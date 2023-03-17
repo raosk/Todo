@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.compose.material.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,7 @@ import com.example.todo.ui.theme.TodoTheme
 import com.example.todo.viewmodel.TodoViewModel
 import androidx.compose.foundation.lazy.items
 import com.example.todo.model.Todo
+import com.example.todo.viewmodel.TodoUIState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TodoScreen()
+                    TodoApp()
                 }
             }
         }
@@ -35,8 +37,36 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun TodoScreen(todoViewModel: TodoViewModel = viewModel()) {
-    TodoList(todoViewModel.todos)
+fun TodoApp(todoViewModel: TodoViewModel = viewModel()) {
+    Scaffold (
+        topBar = { TopAppBar(
+            title = { Text("Todos")}
+        ) }
+    ) {
+        Column(
+            modifier = Modifier.padding(it)
+        ) {
+            TodoScreen(uiState = todoViewModel.todoUIState)
+        }
+    }
+}
+@Composable
+fun TodoScreen(uiState: TodoUIState) {
+    when (uiState) {
+        is TodoUIState.Loading -> LoadingScreen()
+        is TodoUIState.Success -> TodoList(uiState.todos)
+        is TodoUIState.Error -> ErrorScreen()
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Text("Loading...")
+}
+
+@Composable
+fun ErrorScreen() {
+    Text("Error retrieving data from API.")
 }
 
 @Composable
@@ -58,6 +88,6 @@ fun TodoList(todos: List<Todo>) {
 @Composable
 fun DefaultPreview() {
     TodoTheme {
-        TodoScreen()
+        TodoTheme{}
     }
 }
